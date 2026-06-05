@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\File;
 
 class MediaType extends AbstractType
 {
@@ -19,11 +20,23 @@ class MediaType extends AbstractType
         $builder
             ->add('file', FileType::class, [
                 'label' => 'Image',
+                'constraints' => [
+                    new File([
+                        'maxSize' => '2M',
+                        'maxSizeMessage' => 'L’image ne doit pas dépasser 2 Mo.',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                            'image/webp',
+                            'image/gif',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez envoyer une image JPG, PNG, WEBP ou GIF.',
+                    ]),
+                ],
             ])
             ->add('title', TextType::class, [
                 'label' => 'Titre',
-            ])
-        ;
+            ]);
 
         if ($options['is_admin']) {
             $builder
@@ -38,8 +51,7 @@ class MediaType extends AbstractType
                     'required' => false,
                     'class' => Album::class,
                     'choice_label' => 'name',
-                ])
-            ;
+                ]);
         }
     }
 
