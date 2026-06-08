@@ -6,8 +6,10 @@
         <a href="{{ path('admin_media_index') }}" class="btn btn-primary">Retour</a>
     </div>
     {{ form_start(form) }}
-        {{ form_row(form.user) }}
-        {% if is_granted('ROLE_ADMIN') %}
+        {% if form.user is defined %}
+            {{ form_row(form.user) }}
+        {% endif %}
+        {% if form.album is defined %}
             {{ form_row(form.album) }}
             {{ form_row(form.title) }}
         {% endif %}

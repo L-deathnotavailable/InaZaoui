@@ -27,7 +27,11 @@ class HomeController extends AbstractController
     #[Route('/guests', name: 'guests')]
     public function guests()
     {
-        $guests = $this->doctrine->getRepository(User::class)->findBy(['admin' => false]);
+        $guests = $this->doctrine->getRepository(User::class)->findBy([
+            'admin' => false,
+            'blocked' => false,
+        ]);
+
         return $this->render('front/guests.html.twig', [
             'guests' => $guests
         ]);
@@ -36,7 +40,16 @@ class HomeController extends AbstractController
     #[Route('/guest/{id}', name: 'guest')]
     public function guest(int $id)
     {
-        $guest = $this->doctrine->getRepository(User::class)->find($id);
+        $guest = $this->doctrine->getRepository(User::class)->findOneBy([
+            'id' => $id,
+            'admin' => false,
+            'blocked' => false,
+        ]);
+
+        if (!$guest) {
+            throw $this->createNotFoundException('Invité introuvable.');
+        }
+
         return $this->render('front/guest.html.twig', [
             'guest' => $guest
         ]);

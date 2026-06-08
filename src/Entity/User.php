@@ -33,6 +33,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $password = null;
 
+    #[ORM\Column]
+    private bool $blocked = false;
+
     #[ORM\OneToMany(targetEntity: Media::class, mappedBy: 'user')]
     private Collection $medias;
 
@@ -116,6 +119,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
+        if ($this->blocked) {
+            return [];
+        }
+
         return $this->admin
             ? ['ROLE_ADMIN']
             : ['ROLE_USER'];
@@ -143,5 +150,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
+    }
+    public function isBlocked(): bool
+    {
+        return $this->blocked;
+    }
+
+    public function setBlocked(bool $blocked): void
+    {
+        $this->blocked = $blocked;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Media;
+use App\Entity\User;
 use App\Form\MediaType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -37,7 +38,7 @@ class MediaController extends AbstractController
             25 * ($page - 1)
         );
 
-        $total = count($this->doctrine->getRepository(Media::class)->findBy([]));
+        $total = count($this->doctrine->getRepository(Media::class)->findBy($criteria));
 
         return $this->render('admin/media/index.html.twig', [
             'medias' => $medias,
@@ -74,6 +75,10 @@ class MediaController extends AbstractController
                 );
 
                 return $this->redirectToRoute('admin_media_add');
+            }
+
+            if (!$this->isGranted('ROLE_ADMIN')) {
+                $media->setTitle(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) ?: 'Image');
             }
 
             $filename = md5(uniqid('', true)) . '.' . $file->guessExtension();
@@ -118,6 +123,10 @@ class MediaController extends AbstractController
 
         if (!$media) {
             throw $this->createNotFoundException('Média introuvable.');
+        }
+
+        if (!$this->isGranted('ROLE_ADMIN') && $media->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException('Vous ne pouvez supprimer que vos propres médias.');
         }
 
         $filePath = $this->getParameter('kernel.project_dir')
