@@ -27,6 +27,37 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
+     * Retourne les invités actifs avec le nombre de médias associés.
+     *
+     * Cette méthode évite de charger la collection complète des médias
+     * pour chaque invité dans Twig avec guest.medias|length.
+     *
+     * @return array<int, array{guest: User, mediaCount: int}>
+     */
+    public function findActiveGuestsWithMediaCount(): array
+    {
+        $results = $this->createQueryBuilder('u')
+            ->select('u AS guest')
+            ->addSelect('COUNT(m.id) AS mediaCount')
+            ->leftJoin('u.medias', 'm')
+            ->andWhere('u.admin = :admin')
+            ->andWhere('u.blocked = :blocked')
+            ->setParameter('admin', false)
+            ->setParameter('blocked', false)
+            ->groupBy('u.id')
+            ->orderBy('u.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return array_map(static function (array $row): array {
+            return [
+                'guest' => $row['guest'],
+                'mediaCount' => (int) $row['mediaCount'],
+            ];
+        }, $results);
+    }
+
+    /**
      * Used to upgrade (rehash) the user's password automatically over time.
      */
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void

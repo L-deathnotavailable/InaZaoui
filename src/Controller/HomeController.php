@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Album;
 use App\Entity\Media;
 use App\Entity\User;
+use App\Repository\UserRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
@@ -12,10 +13,14 @@ use Symfony\Component\Routing\Attribute\Route;
 class HomeController extends AbstractController
 {
     private ManagerRegistry $doctrine;
+    private UserRepository $userRepository;
 
-    public function __construct(ManagerRegistry $doctrine)
-    {
+    public function __construct(
+        ManagerRegistry $doctrine,
+        UserRepository $userRepository
+    ) {
         $this->doctrine = $doctrine;
+        $this->userRepository = $userRepository;
     }
 
     #[Route('/', name: 'home')]
@@ -27,13 +32,10 @@ class HomeController extends AbstractController
     #[Route('/guests', name: 'guests')]
     public function guests()
     {
-        $guests = $this->doctrine->getRepository(User::class)->findBy([
-            'admin' => false,
-            'blocked' => false,
-        ]);
+        $guests = $this->userRepository->findActiveGuestsWithMediaCount();
 
         return $this->render('front/guests.html.twig', [
-            'guests' => $guests
+            'guests' => $guests,
         ]);
     }
 
@@ -51,7 +53,7 @@ class HomeController extends AbstractController
         }
 
         return $this->render('front/guest.html.twig', [
-            'guest' => $guest
+            'guest' => $guest,
         ]);
     }
 
@@ -65,10 +67,11 @@ class HomeController extends AbstractController
         $medias = $album
             ? $this->doctrine->getRepository(Media::class)->findBy(['album' => $album])
             : $this->doctrine->getRepository(Media::class)->findBy(['user' => $user]);
+
         return $this->render('front/portfolio.html.twig', [
             'albums' => $albums,
             'album' => $album,
-            'medias' => $medias
+            'medias' => $medias,
         ]);
     }
 
