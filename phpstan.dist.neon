@@ -1,0 +1,17 @@
+parameters:
+    level: 5
+    paths:
+        - src/
+
+    ignoreErrors:
+        -
+            identifier: property.unusedType
+            path: src/Entity/Album.php
+
+        -
+            identifier: property.unusedType
+            path: src/Entity/Media.php
+
+        -
+            identifier: property.unusedType
+            path: src/Entity/User.php

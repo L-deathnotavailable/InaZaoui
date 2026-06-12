@@ -28,7 +28,7 @@ class MediaController extends AbstractController
         $criteria = [];
 
         if (!$this->isGranted('ROLE_ADMIN')) {
-            $criteria['user'] = $this->getUser();
+            $criteria['user'] = $this->getAuthenticatedUser();
         }
 
         $medias = $this->doctrine->getRepository(Media::class)->findBy(
@@ -63,7 +63,7 @@ class MediaController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
 
             if (!$this->isGranted('ROLE_ADMIN')) {
-                $media->setUser($this->getUser());
+                $media->setUser($this->getAuthenticatedUser());
             }
 
             $file = $media->getFile();
@@ -99,7 +99,7 @@ class MediaController extends AbstractController
                     'Image ajoutée avec succès.'
                 );
             } catch (FileException $e) {
-
+                
                 $this->addFlash(
                     'danger',
                     'Une erreur est survenue lors de l’upload du fichier.'
@@ -125,7 +125,7 @@ class MediaController extends AbstractController
             throw $this->createNotFoundException('Média introuvable.');
         }
 
-        if (!$this->isGranted('ROLE_ADMIN') && $media->getUser() !== $this->getUser()) {
+        if (!$this->isGranted('ROLE_ADMIN') && $media->getUser() !== $this->getAuthenticatedUser()) {
             throw $this->createAccessDeniedException('Vous ne pouvez supprimer que vos propres médias.');
         }
 
@@ -146,5 +146,16 @@ class MediaController extends AbstractController
         );
 
         return $this->redirectToRoute('admin_media_index');
+    }
+
+    private function getAuthenticatedUser(): User
+    {
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException('Utilisateur invalide.');
+        }
+
+        return $user;
     }
 }
