@@ -1,5 +1,7 @@
 {
     "type": "project",
+    "name": "ina-zaoui/app",
+    "description": "Application Symfony de gestion de portfolio, invités et médias pour Ina Zaoui",
     "license": "proprietary",
     "minimum-stability": "stable",
     "prefer-stable": true,
