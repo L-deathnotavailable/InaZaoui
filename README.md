@@ -238,7 +238,15 @@ tests/Form        Tests des formulaires Symfony
 tests/Functional  Tests fonctionnels des routes et comportements
 tests/Unit        Tests unitaires des entités et services
 ```
+## Analyse statique
 
+Le projet utilise PHPStan pour analyser statiquement le code applicatif.
+
+La configuration se trouve dans :
+
+```txt
+phpstan.dist.neon
+```
 ### Préparer l’environnement de test
 
 Le projet utilise une base MySQL dédiée à l’environnement de test.
@@ -378,4 +386,10 @@ Lancer la couverture :
 
 ```bash
 php bin/phpunit --coverage-text
+```
+
+Lancer l’analyse statique PHPStan :
+
+```bash
+php -d memory_limit=1G vendor/bin/phpstan analyse -c phpstan.dist.neon --no-progress
 ```

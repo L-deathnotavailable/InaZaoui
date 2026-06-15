@@ -397,22 +397,46 @@ Toute modification de sécurité doit être accompagnée de tests fonctionnels.
 Avant validation, vérifier :
 
 ```bash
+composer validate --strict
 composer audit
 php bin/console doctrine:schema:validate
+php -d memory_limit=1G vendor/bin/phpstan analyse -c phpstan.dist.neon --no-progress
+php bin/console doctrine:fixtures:load --env=test
 php bin/phpunit
 ```
+
+PHPStan est utilisé comme outil d’analyse statique.
+
+Sa configuration se trouve dans le fichier :
+
+```txt
+phpstan.dist.neon
+```
+
+L’analyse porte principalement sur le dossier :
+
+```txt
+src/
+```
+
+Les tests sont validés séparément avec PHPUnit.
 
 Puis, si Xdebug est disponible :
 
 ```bash
+php bin/console doctrine:fixtures:load --env=test
 php bin/phpunit --coverage-text
 ```
+
+La commande `--coverage-text` exécute déjà les tests. Il n’est donc pas nécessaire de lancer `php bin/phpunit` juste avant, sauf si les fixtures sont rechargées entre les deux commandes.
 
 Une contribution est acceptable si :
 
 * les tests passent ;
+* l’analyse PHPStan ne retourne aucune erreur ;
 * la couverture reste supérieure à 70 % ;
 * aucun problème de sécurité Composer n’est détecté ;
+* le schéma Doctrine est valide ;
 * le code reste lisible ;
 * la documentation est mise à jour si nécessaire.
 
